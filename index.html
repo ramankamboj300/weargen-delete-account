@@ -63,7 +63,12 @@
       transition: 0.3s;
     }
 
-    button:hover {
+    button:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+
+    button:hover:not(:disabled) {
       background: #d9363e;
     }
 
@@ -91,12 +96,12 @@
   <p>Enter your registered email to request account deletion.</p>
 
   <input type="email" id="email" placeholder="Enter your email" />
-  <button onclick="submitRequest()">Delete My Account</button>
+  <button id="btn" onclick="submitRequest()">Delete My Account</button>
 
   <div id="msg"></div>
 
   <div class="footer">
-    Your account will be deleted within 7 days.
+    If this email is registered, your account will be deleted within 7 days.
   </div>
 </div>
 
@@ -108,41 +113,55 @@
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzYmJocGdncnJwd2ZidXRxbHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNTIwNTcsImV4cCI6MjA5MjYyODA1N30.ZYRB6PerytyVLIKtdVQJHxH4RtczdQz-0pddqldGFNk"
   );
 
-
   async function submitRequest() {
-  const email = document.getElementById("email").value.trim();
-  const msg = document.getElementById("msg");
+    const email = document.getElementById("email").value.trim();
+    const msg = document.getElementById("msg");
+    const btn = document.getElementById("btn");
 
-  msg.innerHTML = "";
+    msg.innerHTML = "";
 
-  if (!email) {
-    msg.innerHTML = "<div class='error'>Please enter your email</div>";
-    return;
+    if (!email) {
+      msg.innerHTML = "<div class='error'>Please enter your email</div>";
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Processing...";
+
+    try {
+      // STEP 1: check if email exists
+      const { data: user } = await supabase
+        .from("users")
+        .select("email")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (!user) {
+        // security safe message (no info leak)
+        msg.innerHTML = "<div class='success'>If this email is registered, your request has been submitted.</div>";
+        btn.disabled = false;
+        btn.innerText = "Delete My Account";
+        return;
+      }
+
+      // STEP 2: insert delete request
+      const { error } = await supabase
+        .from("delete_requests")
+        .insert([{ email: email }]);
+
+      if (error) {
+        msg.innerHTML = "<div class='error'>Request already submitted or failed</div>";
+      } else {
+        msg.innerHTML = "<div class='success'>Delete request submitted successfully</div>";
+      }
+
+    } catch (err) {
+      msg.innerHTML = "<div class='error'>Something went wrong</div>";
+    }
+
+    btn.disabled = false;
+    btn.innerText = "Delete My Account";
   }
-
-  // STEP 1: check if email exists
-  const { data: user, error: userError } = await supabase
-    .from("users")
-    .select("*")
-    .eq("email", email)
-    .single();
-
-  if (!user) {
-    msg.innerHTML = "<div class='error'>Email not registered</div>";
-    return;
-  }
-
-  // STEP 2: insert delete request
-  const { error } = await supabase
-    .from("delete_requests")
-    .insert([{ email: email }]);
-
-  if (error) {
-    msg.innerHTML = "<div class='error'>Already requested or error</div>";
-  } else {
-    msg.innerHTML = "<div class='success'>Delete request submitted</div>";
-  }
-}
 </script>
 
 </body>
