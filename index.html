@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Delete Account Request</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <style>
     body {
       margin: 0;
@@ -96,8 +96,8 @@
   <p>Enter your registered email to request account deletion.</p>
 
   <input type="email" id="email" placeholder="Enter your email" />
-  <button id="btn" onclick="submitRequest()">Delete My Account</button>
 
+  <button id="btn">Delete My Account</button>
   <div id="msg"></div>
 
   <div class="footer">
@@ -108,6 +108,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+  document.getElementById("btn").addEventListener("click", submitRequest);
   const supabase = window.supabase.createClient(
     "https://ksbbhpggrrpwfbutqlsa.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzYmJocGdncnJwd2ZidXRxbHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNTIwNTcsImV4cCI6MjA5MjYyODA1N30.ZYRB6PerytyVLIKtdVQJHxH4RtczdQz-0pddqldGFNk"
