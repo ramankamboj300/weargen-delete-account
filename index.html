@@ -105,10 +105,7 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
-  document.getElementById("btn").addEventListener("click", submitRequest);
   const supabase = window.supabase.createClient(
     "https://ksbbhpggrrpwfbutqlsa.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzYmJocGdncnJwd2ZidXRxbHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNTIwNTcsImV4cCI6MjA5MjYyODA1N30.ZYRB6PerytyVLIKtdVQJHxH4RtczdQz-0pddqldGFNk"
@@ -163,6 +160,9 @@
     btn.disabled = false;
     btn.innerText = "Delete My Account";
   }
+
+  
+  document.getElementById("btn").addEventListener("click", submitRequest);
 </script>
 
 </body>
