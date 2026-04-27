@@ -69,40 +69,52 @@
 
   document.getElementById("btn").addEventListener("click", submitRequest);
 
+ 
   async function submitRequest() {
-    const email = document.getElementById("email").value.trim();
-    const msg = document.getElementById("msg");
+  const email = document.getElementById("email").value.trim();
+  const msg = document.getElementById("msg");
+  const btn = document.getElementById("btn");
 
-    msg.innerHTML = "";
+  msg.innerHTML = "";
 
-    if (!email) {
-      msg.innerHTML = "Please enter email";
-      return;
-    }
+  if (!email) {
+    msg.innerHTML = "<div class='error'>Please enter your email</div>";
+    return;
+  }
 
-    // check user exists
+  btn.disabled = true;
+  btn.innerText = "Processing...";
+
+  try {
+    // check if email exists
     const { data: user } = await client
       .from("users")
       .select("email")
       .eq("email", email)
       .maybeSingle();
 
-    if (!user) {
-      msg.innerHTML = "If this email exists, request submitted";
-      return;
+    if (user) {
+      // only insert if exists
+      await client
+        .from("delete_requests")
+        .insert([{ email }]);
     }
 
-    // insert request
-    const { error } = await client
-      .from("delete_requests")
-      .insert([{ email }]);
+    // SAME message for both cases
+    msg.innerHTML = `
+      <div class='success'>
+        If this email is registered, your deletion request has been received.
+        Your account will be permanently deleted within 7 days.
+      </div>
+    `;
 
-    if (error) {
-      msg.innerHTML = "Already requested or error";
-    } else {
-msg.innerHTML = "<div class='success'>Request submitted successfully. Your account will be permanently deleted within 7 days.</div>";
-          }
+  } catch (err) {
+    msg.innerHTML = "<div class='error'>Something went wrong</div>";
   }
+
+  btn.disabled = false;
+  btn.innerText = "Delete My Account";
+}
 </script>
 
 </body>
