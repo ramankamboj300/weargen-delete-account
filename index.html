@@ -108,35 +108,41 @@
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzYmJocGdncnJwd2ZidXRxbHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNTIwNTcsImV4cCI6MjA5MjYyODA1N30.ZYRB6PerytyVLIKtdVQJHxH4RtczdQz-0pddqldGFNk"
   );
 
+
   async function submitRequest() {
-    const email = document.getElementById("email").value.trim();
-    const msg = document.getElementById("msg");
+  const email = document.getElementById("email").value.trim();
+  const msg = document.getElementById("msg");
 
-    msg.innerHTML = "";
+  msg.innerHTML = "";
 
-    if (!email) {
-      msg.innerHTML = "<div class='error'>Please enter your email</div>";
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from("delete_requests")
-        .insert([{ email: email }]);
-
-      if (error) {
-        if (error.message.includes("duplicate")) {
-          msg.innerHTML = "<div class='error'>Request already submitted</div>";
-        } else {
-          msg.innerHTML = "<div class='error'>" + error.message + "</div>";
-        }
-      } else {
-        msg.innerHTML = "<div class='success'>Request submitted successfully</div>";
-      }
-    } catch (err) {
-      msg.innerHTML = "<div class='error'>Something went wrong</div>";
-    }
+  if (!email) {
+    msg.innerHTML = "<div class='error'>Please enter your email</div>";
+    return;
   }
+
+  // STEP 1: check if email exists
+  const { data: user, error: userError } = await supabase
+    .from("users")
+    .select("*")
+    .eq("email", email)
+    .single();
+
+  if (!user) {
+    msg.innerHTML = "<div class='error'>Email not registered</div>";
+    return;
+  }
+
+  // STEP 2: insert delete request
+  const { error } = await supabase
+    .from("delete_requests")
+    .insert([{ email: email }]);
+
+  if (error) {
+    msg.innerHTML = "<div class='error'>Already requested or error</div>";
+  } else {
+    msg.innerHTML = "<div class='success'>Delete request submitted</div>";
+  }
+}
 </script>
 
 </body>
